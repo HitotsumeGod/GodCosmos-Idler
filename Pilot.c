@@ -3,13 +3,27 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <syslog.h>
+#include <time.h>
+#include <assert.h>
 
+static void daemonize();
 int mine(FILE* fptr);
 FILE* wipe(FILE* fptr, char* filename);
 void on_term(int sig);
+char* getlocaltime(char* s);
 
 int main(void) {
-
+	
+	//code copied from stackoverflow (https://stackoverflow.com/a/30759067) begins
+	char s[64];
+	time_t t = time(NULL);
+    	struct tm *tm = localtime(&t);
+   	size_t ret = strftime(s, sizeof(s), "%c", tm);
+    	assert(ret);
+	//code copied from stackoverflow ends
+	daemonize();
+	syslog(LOG_NOTICE, "%s%s", "Daemon is begun at ", s);
 	FILE *thefile, *wipef;
 	struct sigaction sigh;
 	wipe(wipef, "f_data");
@@ -25,6 +39,18 @@ int main(void) {
 	}
 	return 0;
 
+}
+
+static void daemonize() {
+
+	pid_t pid;
+	pid = fork();
+	if (pid > 0)
+		exit(EXIT_SUCCESS);
+	if (pid < 0) 
+		exit(EXIT_FAILURE);
+	if (setsid() < 0)
+		exit(EXIT_FAILURE);
 }
 
 int mine(FILE* f) {
@@ -96,3 +122,15 @@ void on_term(int sig) {
 	}
 	exit(1);
 }
+
+/*char* getlocaltime(char* s) {
+
+	//code copied from stackoverflow (https://stackoverflow.com/a/30759067) begins
+	time_t t = time(NULL);
+    	struct tm *tm = localtime(&t);
+   	size_t ret = strftime(s, sizeof(s), "%c", tm);
+    	assert(ret);
+	//code copied from stackoverflow ends
+	return s;
+
+}*/
