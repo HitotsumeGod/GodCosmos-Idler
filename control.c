@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void startup();
+
 int main(void) {
 	
 	FILE* fptr;
@@ -17,5 +19,11 @@ int main(void) {
 		exit(1);
 	}
 	return 0;
+
+}
+
+void startup() {
+
+	printf("Welcome to the interactive control panel for the GodCosmos idler.")
 
 }
